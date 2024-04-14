@@ -1,0 +1,2 @@
+# BuckshotRouletteClairvoyance
+游戏恶魔轮盘赌的透视，按Q查看枪內子弹
