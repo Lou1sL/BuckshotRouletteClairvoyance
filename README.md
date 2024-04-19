@@ -1,6 +1,6 @@
 # BuckshotRouletteClairvoyance
 
-Press Q to view.
+Press Q to check the bullets.
 
 Steps:
 Use GodotPCKExplorer, Extract all & rip pack from the game executable, copy code into the extracted \scripts\ShellSpawner.gd, then pack & embed the code back and it's done, enjoy.
