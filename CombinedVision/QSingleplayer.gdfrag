@@ -1,0 +1,46 @@
+# Direct Q display only. Never emit an event to the probability model.
+var _direct_sequence_label: Label
+var _direct_sequence_until_msec: int = 0
+
+func _input(event):
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q:
+		_ShowDirectSequence()
+
+func _ShowDirectSequence():
+	if sequenceArray.is_empty():
+		return
+	if not is_instance_valid(_direct_sequence_label):
+		var overlay = CanvasLayer.new()
+		overlay.layer = 100
+		add_child(overlay)
+		_direct_sequence_label = Label.new()
+		overlay.add_child(_direct_sequence_label)
+		_direct_sequence_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		_direct_sequence_label.offset_left = 24
+		_direct_sequence_label.offset_right = -24
+		_direct_sequence_label.offset_top = 32
+		_direct_sequence_label.offset_bottom = 80
+		_direct_sequence_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_direct_sequence_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_direct_sequence_label.add_theme_font_size_override("font_size", 28)
+		_direct_sequence_label.add_theme_color_override("font_color", Color.WHITE)
+		_direct_sequence_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		_direct_sequence_label.add_theme_constant_override("outline_size", 6)
+	_direct_sequence_until_msec = Time.get_ticks_msec() + 3000
+	_RefreshDirectSequence()
+
+func _RefreshDirectSequence():
+	if not is_instance_valid(_direct_sequence_label):
+		return
+	if Time.get_ticks_msec() >= _direct_sequence_until_msec or sequenceArray.is_empty():
+		_direct_sequence_label.hide()
+		_direct_sequence_until_msec = 0
+		return
+	var text = ">"
+	for shell in sequenceArray:
+		match shell:
+			"live": text += "1"
+			"blank": text += "0"
+			_: text += "?"
+	_direct_sequence_label.text = text
+	_direct_sequence_label.show()

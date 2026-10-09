@@ -1,0 +1,62 @@
+# Direct Q display only. Never emit an event to the probability model.
+# Append to MP_UserInstanceProperties.gd in the user's own inspected game.
+var _clairvoyance_label : Label
+var _clairvoyance_until_msec : int = 0
+
+func _ClairvoyanceSequence() -> Array:
+	if !is_active || GlobalSteam.STEAM_ID != GlobalSteam.HOST_ID:
+		return []
+	if !is_instance_valid(intermediary) || !is_instance_valid(intermediary.game_state):
+		return []
+	if is_instance_valid(intermediary.ingame_lobby_ui):
+		if intermediary.ingame_lobby_ui.viewing_ui || !intermediary.ingame_lobby_ui.toggle_allowed:
+			return []
+	if !is_instance_valid(intermediary.roundManager) || !intermediary.roundManager.intro_finished:
+		return []
+	var game_state = intermediary.game_state
+	if game_state.MAIN_shotgun_loading_in_progress || game_state.MAIN_running_win_routine:
+		return []
+	var sequence = game_state.MAIN_active_sequence_dict.get("sequence_in_shotgun", [])
+	if sequence is Array:
+		return sequence
+	return []
+
+func _ShowClairvoyance():
+	if _ClairvoyanceSequence().is_empty():
+		return
+	if !is_instance_valid(_clairvoyance_label):
+		var overlay = CanvasLayer.new()
+		overlay.layer = 100
+		add_child(overlay)
+		_clairvoyance_label = Label.new()
+		overlay.add_child(_clairvoyance_label)
+		_clairvoyance_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		_clairvoyance_label.offset_left = 24
+		_clairvoyance_label.offset_right = -24
+		_clairvoyance_label.offset_top = 32
+		_clairvoyance_label.offset_bottom = 80
+		_clairvoyance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_clairvoyance_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_clairvoyance_label.add_theme_font_size_override("font_size", 28)
+		_clairvoyance_label.add_theme_color_override("font_color", Color.WHITE)
+		_clairvoyance_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		_clairvoyance_label.add_theme_constant_override("outline_size", 6)
+	_clairvoyance_until_msec = Time.get_ticks_msec() + 3000
+	_RefreshClairvoyance()
+
+func _RefreshClairvoyance():
+	if !is_instance_valid(_clairvoyance_label):
+		return
+	var sequence = _ClairvoyanceSequence()
+	if Time.get_ticks_msec() >= _clairvoyance_until_msec || sequence.is_empty():
+		_clairvoyance_label.hide()
+		_clairvoyance_until_msec = 0
+		return
+	var shell_text = ">"
+	for shell in sequence:
+		match shell:
+			"live": shell_text += "1"
+			"blank": shell_text += "0"
+			_: shell_text += "?"
+	_clairvoyance_label.text = shell_text
+	_clairvoyance_label.show()

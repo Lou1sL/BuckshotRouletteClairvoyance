@@ -1,0 +1,26 @@
+# Locally generated game builds, original assets and backups are never source.
+*.exe
+*.dll
+*.pck
+*.zip
+*.backup*
+*.before-*
+build/
+.build/
+dist/
+outputs/
+work/
+tools/godot-*/
+.godot/
+__pycache__/
+*.py[cod]
+*.log
+*.stdout.txt
+*.stderr.txt
+**/build-verification*.json
+**/installation.json
+**/QE-install-*.json
+**/ProbabilityVision-install-*.json
+**/HUD-preview.png
+.env
+.env.*
